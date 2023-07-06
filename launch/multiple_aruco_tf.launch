@@ -1,0 +1,45 @@
+<launch>
+
+<arg name="fixed_tf"  default="map"/>
+<arg name="camera_name" default="laptop_camera"/>
+
+<node pkg="cv_camera" type="cv_camera_node" name="$(arg camera_name)" output="screen">
+	<param name="device_id" value="0"/>
+	<param name="frame_id" value="$(arg camera_name)"/>
+	<param name="camera_info_url" value="file://$(dirname)/../camera_info/$(arg camera_name).yaml"/>
+</node>
+
+<node pkg="tf" type="static_transform_publisher" name="camera_broadcaster" 
+      args="0 0 0.3 -1.5708 0 -1.5708 $(arg fixed_tf) $(arg camera_name) 100" />
+
+<node pkg="image_proc" type="image_proc" name="image_proc" ns="$(arg camera_name)" />
+
+<arg name="node_name"  default="multiple_aruco_tf"/>
+
+<node pkg="$(arg node_name)" type="$(arg node_name)" name="$(arg node_name)">
+	<remap from="/camera_info" to="/$(arg camera_name)/camera_info" />
+	<remap from="/image" to="/$(arg camera_name)/image_rect_color" />
+    <param name="marker_size" value="0.034"/>
+	<param name="parent_name" value="$(arg camera_name)"/>  
+	<param name="dictionary_type" value="ARUCO_MIP_36h12"/>  
+</node>
+
+<node pkg="image_view" type="image_view" name="image_aruco_result">
+	<remap from="image" to="/$(arg node_name)/result"/> 
+</node>
+
+<node pkg="rviz" type="rviz" name="rviz" 
+      args="-f $(arg fixed_tf) -d $(dirname)/../rviz/config.rviz"/>
+
+</launch>
+
+<!-- Dictionary Types
+	ARUCO, ARUCO_MIP_16h3, ARUCO_MIP_16h3, ARUCO_MIP_25h7, ARUCO_MIP_36h12
+    ARTOOLKITPLUS, RTOOLKITPLUSBCH
+    ARTAG
+    TAG16h5, TAG25h7, TAG25h9, TAG36h11, TAG36h10
+    CHILITAGS
+    ALL_DICTS
+    
+    https://damianofalcioni.github.io/js-aruco2/samples/marker-creator/marker-creator.html
+!-->
