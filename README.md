@@ -9,6 +9,7 @@ This ros package shows the detection of multiple aruco markers and the correspon
 1. Clone this package to your ~/catkin_ws/src:
 
    cd ~/catkin_ws/src
+
    git clone https://github.com/RafaelNunezCruz/multiple_aruco_tf.git
 
 3. This package depends on aruco-ros, if you don't have it, clone it to your ~/catkin_ws/src:
