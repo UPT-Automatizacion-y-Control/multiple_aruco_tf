@@ -50,7 +50,7 @@ This ros package shows the detection of multiple aruco markers and the correspon
 
     roslaunch multiple_aruco_tf multiple_aruco_tf.launch 
 
-You should be able to see the video stream and the aruco marker detection as well as rviz showing tf.
+Now you should be able to see the video stream and the aruco marker detection as well as rviz showing tf.
 
 In case aruco markers are not detected edit dictionary_type in multiple_aruco_tf.launch.
 
