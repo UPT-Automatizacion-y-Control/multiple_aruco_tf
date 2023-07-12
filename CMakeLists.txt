@@ -14,5 +14,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
- add_executable(multiple_aruco_tf src/multiple_aruco_tf.cpp)
- target_link_libraries(multiple_aruco_tf ${catkin_LIBRARIES} )
+add_executable(multiple_aruco_tf src/multiple_aruco_tf.cpp)
+target_link_libraries(multiple_aruco_tf ${catkin_LIBRARIES})
+
+add_executable(relative_pose src/relative_pose.cpp)
+target_link_libraries(relative_pose ${catkin_LIBRARIES})

@@ -14,26 +14,33 @@
 
 <node pkg="image_proc" type="image_proc" name="image_proc" ns="$(arg camera_name)" />
 
-<arg name="node_name"  default="multiple_aruco_tf"/>
-
-<node pkg="$(arg node_name)" type="$(arg node_name)" name="$(arg node_name)">
+<node pkg="multiple_aruco_tf" type="multiple_aruco_tf" name="multiple_aruco_tf">
 	<remap from="/camera_info" to="/$(arg camera_name)/camera_info" />
 	<remap from="/image" to="/$(arg camera_name)/image_rect_color" />
-    <param name="marker_size" value="0.034"/>
+    <param name="marker_size" value="0.062"/>
 	<param name="parent_name" value="$(arg camera_name)"/>  
 	<param name="dictionary_type" value="ARUCO_MIP_36h12"/>  
 </node>
 
 <node pkg="image_view" type="image_view" name="image_aruco_result">
-	<remap from="image" to="/$(arg node_name)/result"/> 
+	<remap from="image" to="/multiple_aruco_tf/result"/> 
 </node>
 
 <node pkg="rviz" type="rviz" name="rviz" 
       args="-f $(arg fixed_tf) -d $(dirname)/../rviz/config.rviz"/>
+      
+<node pkg="multiple_aruco_tf" type="relative_pose" name="relative_pose_node" output="screen">
+	<param name="tf_begin" value="marker_0"/>
+	<param name="tf_end" value="marker_1"/>
+</node>
+
+<node pkg="rostopic" type="rostopic" name="echo_relative_pose" args="echo /relative_pose_node/relative_pose"  output="screen" />
 
 </launch>
 
-<!-- Dictionary Types
+<!-- 
+
+Dictionary Types
 	ARUCO, ARUCO_MIP_16h3, ARUCO_MIP_16h3, ARUCO_MIP_25h7, ARUCO_MIP_36h12
     ARTOOLKITPLUS, RTOOLKITPLUSBCH
     ARTAG
