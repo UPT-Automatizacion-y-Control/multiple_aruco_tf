@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
 #include <geometry_msgs/Twist.h>
+#include <multiple_aruco_tf/CurrentPose.h>
 
 std::string tf_begin, tf_end;
 tf::StampedTransform transform;
@@ -34,6 +35,13 @@ void timerCallback(const ros::TimerEvent&)
 		
 	pub.publish(relative_pose);       
 }
+ 
+bool srvCallback(multiple_aruco_tf::CurrentPose::Request  &req,
+         multiple_aruco_tf::CurrentPose::Response &res)
+{
+  res.pose = relative_pose;
+  return true;
+}
 
 int main(int argc, char **argv)
 {
@@ -54,5 +62,6 @@ int main(int argc, char **argv)
 
   ros::Timer timer = nh.createTimer(ros::Duration(1.0/24.0), timerCallback);
   pub = nh.advertise<geometry_msgs::Twist>("relative_pose", 10); 
+  ros::ServiceServer service = nh.advertiseService("current_pose", srvCallback);
   ros::spin();
 }
