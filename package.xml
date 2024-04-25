@@ -10,6 +10,7 @@
   <exec_depend>message_runtime</exec_depend>
   <build_depend>geometry_msgs</build_depend>
   <exec_depend>geometry_msgs</exec_depend>
+  <depend>cv_camera</depend>
   <depend>aruco_ros</depend>
   <export> </export>
 </package>

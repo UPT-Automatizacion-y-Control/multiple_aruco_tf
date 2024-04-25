@@ -1,0 +1,37 @@
+<launch>
+
+<arg name="fixed_tf"  default="map"/>
+<arg name="camera_name" default="rbpi_camera"/>
+
+<node name="camera_broadcaster" pkg="tf" type="static_transform_publisher" 
+      args="0 0 0 0 0 0 $(arg fixed_tf) $(arg camera_name) 100" />
+
+<node name="image_proc" pkg="image_proc" type="image_proc" ns="$(arg camera_name)" />
+
+<node name="multiple_aruco_tf" pkg="multiple_aruco_tf" type="multiple_aruco_tf" >
+	<remap from="/camera_info" to="/$(arg camera_name)/camera_info" />
+	<remap from="/image" to="/$(arg camera_name)/image_rect_color" />
+    <param name="marker_size" value="0.061"/>
+	<param name="parent_name" value="$(arg camera_name)"/>  
+	<param name="dictionary_type" value="ARUCO_MIP_36h12"/>  
+</node>
+      
+<node name="relative_pose_node" pkg="multiple_aruco_tf" type="relative_pose" >
+	<param name="tf_begin" value="$(arg camera_name)"/>
+	<param name="tf_end" value="mobile_b"/>
+</node>
+
+</launch>
+
+<!-- 
+
+Dictionary Types
+	ARUCO, ARUCO_MIP_16h3, ARUCO_MIP_16h3, ARUCO_MIP_25h7, ARUCO_MIP_36h12
+    ARTOOLKITPLUS, RTOOLKITPLUSBCH
+    ARTAG
+    TAG16h5, TAG25h7, TAG25h9, TAG36h11, TAG36h10
+    CHILITAGS
+    ALL_DICTS
+    
+    https://damianofalcioni.github.io/js-aruco2/samples/marker-creator/marker-creator.html
+!-->

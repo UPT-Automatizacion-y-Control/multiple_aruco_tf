@@ -1,0 +1,26 @@
+image_width: 640
+image_height: 480
+camera_name: rbpi_camera
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [500.849231,   0.      , 314.546946,
+           0.      , 503.032596, 246.042576,
+           0.      ,   0.      ,   1.      ]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [0.123435, -0.287196, -0.000260, -0.001896, 0.000000]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1., 0., 0.,
+         0., 1., 0.,
+         0., 0., 1.]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [501.269928,   0.      , 312.253831,   0.     ,
+           0.      , 508.795380, 245.482725,   0.     ,
+           0.      ,   0.      ,   1.      ,   0.     ]

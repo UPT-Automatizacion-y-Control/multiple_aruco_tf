@@ -1,0 +1,19 @@
+<launch>
+
+<arg name="fixed_tf"  default="map"/>
+<arg name="camera_name" default="rbpi_camera"/>
+
+<node name="cv_camera_image_raw" pkg="image_view" type="image_view">
+	<remap from="image" to="/$(arg camera_name)/image_raw"/> 
+</node>
+
+<node name="image_aruco_result" pkg="image_view" type="image_view" >
+	<remap from="image" to="/multiple_aruco_tf/result"/> 
+</node>
+
+<node name="rviz" pkg="rviz" type="rviz"  
+      args="-f $(arg fixed_tf) -d $(dirname)/../rviz/config.rviz"/>
+
+<node name="echo_relative_pose" pkg="rostopic" type="rostopic" args="echo /relative_pose_node/relative_pose"  output="screen" />
+
+</launch>

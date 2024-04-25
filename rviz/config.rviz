@@ -59,11 +59,11 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        laptop_camera:
+        rbpi_camera:
           Value: true
         map:
           Value: true
-        marker_0:
+        mobile_b:
           Value: true
       Marker Alpha: 1
       Marker Scale: 0.5
@@ -73,8 +73,8 @@ Visualization Manager:
       Show Names: true
       Tree:
         map:
-          laptop_camera:
-            marker_0:
+          rbpi_camera:
+            mobile_b:
               {}
       Update Interval: 0
       Value: true

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(multiple_aruco_tf)
 
 find_package(catkin REQUIRED COMPONENTS
+  cv_camera
   aruco_ros
   std_msgs
   geometry_msgs
