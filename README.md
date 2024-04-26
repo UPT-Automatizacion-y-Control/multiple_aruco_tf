@@ -48,7 +48,9 @@ This ros package shows the detection of multiple aruco markers and the correspon
 12. Run in different terminals:
 
     roslaunch multiple_aruco_tf get_image.launch
+    
     roslaunch multiple_aruco_tf get_transformation.launch
+    
     roslaunch multiple_aruco_tf remote_visualization.launch 
 
 Now you should be able to see the video stream and the aruco marker detection as well as rviz showing tf.
