@@ -4,22 +4,29 @@
 <arg name="camera_name" default="rbpi_camera"/>
 
 <node name="camera_broadcaster" pkg="tf" type="static_transform_publisher" 
-      args="0 0 0 0 0 0 $(arg fixed_tf) $(arg camera_name) 100" />
+      args="0 0 0.0224 0 0 0 $(arg fixed_tf) $(arg camera_name) 100" />
 
 <node name="image_proc" pkg="image_proc" type="image_proc" ns="$(arg camera_name)" />
 
-<node name="multiple_aruco_tf" pkg="multiple_aruco_tf" type="multiple_aruco_tf" >
+<node name="multiple_aruco_tf" pkg="multiple_aruco_tf" type="multiple_aruco_tf" output="screen">
 	<remap from="/camera_info" to="/$(arg camera_name)/camera_info" />
-	<remap from="/image" to="/$(arg camera_name)/image_rect_color" />
-    <param name="marker_size" value="0.061"/>
+	<remap from="/image" to="/image_sat/image_out" />
+    <param name="marker_size" value="0.0515"/>
 	<param name="parent_name" value="$(arg camera_name)"/>  
 	<param name="dictionary_type" value="ARUCO_MIP_36h12"/>  
 </node>
       
-<node name="relative_pose_node" pkg="multiple_aruco_tf" type="relative_pose" >
-	<param name="tf_begin" value="$(arg camera_name)"/>
-	<param name="tf_end" value="mobile_b"/>
+<node name="relative_pose_node" pkg="multiple_aruco_tf" type="relative_pose" output="screen">
+	<param name="tf_begin" value="map"/> 
+	<param name="tf_end" value="marker_4"/> 
 </node>
+
+
+<node name="image_sat" pkg="multiple_aruco_tf" type="image_sat" output="screen">
+	<remap from="/image_in" to="/$(arg camera_name)/image_rect" /> 
+	<param name="alpha_val" value="2.0"/>
+	<param name="beta_val" value="-120.0"/> 
+</node> 
 
 </launch>
 

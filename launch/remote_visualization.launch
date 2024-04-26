@@ -1,13 +1,8 @@
 <launch>
 
 <arg name="fixed_tf"  default="map"/>
-<arg name="camera_name" default="rbpi_camera"/>
 
-<node name="cv_camera_image_raw" pkg="image_view" type="image_view">
-	<remap from="image" to="/$(arg camera_name)/image_raw"/> 
-</node>
-
-<node name="image_aruco_result" pkg="image_view" type="image_view" >
+<node name="image_aruco_result" pkg="image_view" type="image_view" output="screen">
 	<remap from="image" to="/multiple_aruco_tf/result"/> 
 </node>
 

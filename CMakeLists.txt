@@ -36,3 +36,6 @@ target_link_libraries(multiple_aruco_tf ${catkin_LIBRARIES})
 add_executable(relative_pose src/relative_pose.cpp)
 target_link_libraries(relative_pose ${catkin_LIBRARIES})
 add_dependencies(relative_pose multiple_aruco_tf_generate_messages_cpp)
+
+add_executable(image_sat src/image_sat.cpp)
+target_link_libraries(image_sat ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
