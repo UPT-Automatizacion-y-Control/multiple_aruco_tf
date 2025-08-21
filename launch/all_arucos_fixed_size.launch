@@ -1,0 +1,55 @@
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    return LaunchDescription([
+        Node(
+            package='cv_camera',
+            executable='cv_camera_node',
+            parameters=[
+                {"device_path": "/dev/video2"},
+                {"device_id": 2},
+                {"frame_id": "camera_720"},
+                {"image_width": 1024},
+                {"image_height": 768},
+                {"rate": 30.0},
+                {"camera_info_url": "file:///home/luis/calibracion_camera_720/calibrationdata/camera_720.yaml"}
+			]
+        ),
+        Node(
+            package='rqt_image_view',
+            executable='rqt_image_view'
+        ),
+        Node(
+            package='image_proc',
+            executable='rectify_node',
+            parameters=[
+                {'image_transport': 'compressed'}
+            ],
+            remappings=[
+                ('image','image_raw'),
+                ('image_rect', 'image_rect')
+            ]
+        ),
+        Node(
+            package='multiple_aruco_ros2',
+            executable='multiple_aruco_tf_ros2',
+            parameters=[
+                {"marker_size": 0.245},
+                {"parent_name": "webcam_4k"},
+                {"dictionary_type": "ALL_DICTS"},
+            ]
+        ),
+        Node(
+            package='multiple_aruco_ros2',
+            executable='relative_pose',
+            parameters=[
+                {"source_frame": "marker_8"},
+                {"target_frame": "marker_7"}
+            ]
+        ),
+        Node(
+             package='rviz2',
+             executable='rviz2'
+        )
+    ])
