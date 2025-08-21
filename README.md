@@ -13,10 +13,11 @@ This the package depends on cv_camera, so it is recommended that you have alread
    ```
    
    ```
-   git clone https://github.com/UPT-Automatizacion-y-Control/multiple_aruco_tf.git
+   git clone -b multiple_aruco_ros2 https://github.com/UPT-Automatizacion-y-Control/multiple_aruco_tf.git
    ```
+2. Change the name of the package from "multiple_aruco_tf" to "multiple_aruco_rso2".
 
-2. Resolve the package dependencies. In your workspace directory:
+3. Resolve the package dependencies. In your workspace directory:
 
    ```
    rosdep install -i --from-path src --rosdistro jazzy -y
