@@ -23,7 +23,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     sensor_msgs
     visualization_msgs
     turtlesim
-    usb_cam
 )
 find_package(ament_cmake REQUIRED)
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
