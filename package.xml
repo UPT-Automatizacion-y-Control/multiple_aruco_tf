@@ -20,7 +20,7 @@
   <depend>aruco_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>visualization_msgs</depend>
-  <depend>usb_cam</depend>
+
   	
   <exec_depend>ros2launch</exec_depend>
 
