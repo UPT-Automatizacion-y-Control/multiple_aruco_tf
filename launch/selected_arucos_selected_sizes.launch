@@ -6,51 +6,70 @@ def generate_launch_description():
         Node(
             package='cv_camera',
             executable='cv_camera_node',
+            name='laptop_cv_camera',
             parameters=[
                 {"device_path": "/dev/video2"},
                 {"device_id": 2},
-                {"frame_id": "camera_720"},
-                {"image_width": 1024},
-                {"image_height": 768},
+                {"frame_id": "camera_laptop"},
+                {"image_width": 1920},
+                {"image_height": 1080},
                 {"rate": 30.0},
-                {"camera_info_url": "file:///home/luis/calibracion_camera_720/calibrationdata/camera_720.yaml"}
-			]
-        ),
-        Node(
-            package='rqt_image_view',
-            executable='rqt_image_view'
+                {"pixel_format": "MJPG"},
+                {"camera_info_url": "file:///home/luis/camara_full_hd_calibration/calibrationdata/camara_full_hd.yaml"}
+			],
+            remappings=[
+                ('image_raw','/laptop/image_raw'),
+                ('image_raw/compressed', '/laptop/image_raw/compressed'),
+                ('camera_info', '/laptop/camera_info')
+            ]
         ),
         Node(
             package='image_proc',
             executable='rectify_node',
+            name='laptop_rectify_node',
             parameters=[
                 {'image_transport': 'compressed'}
             ],
             remappings=[
-                ('image','image_raw'),
-                ('image_rect', 'image_rect')
+                ('image','/laptop/image_raw'),
+                ('image_rect', '/laptop/image_rect'),
+                ('image_rect/compressed', '/laptop/image_rect/compressed')
             ]
         ),
         Node(
             package='multiple_aruco_ros2',
             executable='multiple_aruco_tf_ros2',
+            name ='nodo_aruco_pared',
             parameters=[
-                {"parent_name": "webcam_4k"},
-                {"dictionary_type": "ARUCO_MIP_36h12"},
-                {"recognized_ids": [7, 8]},  # ID's específicos que se quieren reconocer
-                {"recognized_sizes": [0.245, 0.245]}  # Tamaños para cada ID
+                {"parent_name": "camera_laptop"},
+                {"dictionary_type": "/home/luis/test_ws/src/multiple_aruco_ros2/src/aruco7x7.dict"},
+                {"recognized_ids": [1]},  # ID's específicos que se quieren reconocer
+                {"recognized_sizes": [0.55]}  # Tamaños para cada ID
+            ],
+            remappings=[
+                ('image_rect', '/laptop/image_rect'),
+                ('camera_info', '/laptop/camera_info')
             ]
         ),
         Node(
             package='multiple_aruco_ros2',
-            executable='relative_pose',
+            executable='multiple_aruco_tf_ros2',
+            name ='nodo_aruco_lancha',
             parameters=[
-                {"source_frame": "marker_8"},
-                {"target_frame": "marker_7"}
+                {"parent_name": "camera_laptop"},
+                {"dictionary_type": "ARUCO_MIP_36h12"},
+                {"recognized_ids": [8]},  # ID's específicos que se quieren reconocer
+                {"recognized_sizes": [0.245]}  # Tamaños para cada ID
+            ],
+            remappings=[
+                ('result', '/mip36h12/result'),
+                ('result/compressed', '/mip36h12/result/compressed'),
+                ('image_rect', '/laptop/image_rect'),
+                ('camera_info', '/laptop/camera_info'),
             ]
         ),
         Node(
-             package='rviz2',
-             executable='rviz2'
+             package='rqt_image_view',
+             executable='rqt_image_view'
         )
     ])

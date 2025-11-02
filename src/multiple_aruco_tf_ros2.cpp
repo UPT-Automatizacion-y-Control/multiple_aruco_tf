@@ -5,7 +5,6 @@
 #include <map>
 #include <sstream>
 
-// Librerías necesarias de ROS2 y OpenCV
 #include "rclcpp/rclcpp.hpp"
 #include "aruco/aruco.h"
 #include "cv_bridge/cv_bridge.hpp"
@@ -19,75 +18,55 @@
 #include <aruco/cvdrawingutils.h>
 #include "tf2/LinearMath/Transform.h"
 
-// Variables globales para imagen y parametros de la cámara
 cv::Mat inImage;
 aruco::CameraParameters camParam;
 aruco::MarkerDetector mDetector;
 std::vector<aruco::Marker> markers;
 
-// Nodo, publicadores y suscriptores
 rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr cam_info_sub;
 rclcpp::Node::SharedPtr node;
 image_transport::Publisher image_pub;
 
-// Variables para los tf y la detección de los arucos
 std::string parent_name;
 std::string child_name;
 std::string dictionary_type;
 bool useRectifiedImages;
 bool cam_info_received = false;
 
-// Broadcaster para los tf
 std::unique_ptr<tf2_ros::TransformBroadcaster> br;
-
-// Mapa para guardar tamaños personalizados por ID
 std::map<int, double> marker_sizes_by_id;
-double default_marker_size = 0.1;  // Tamaño por defecto (en metros)
+double default_marker_size = 0.1;
 
-
-// Callback para procesar imágenes y detectar marcadores
 void image_callback(const sensor_msgs::msg::Image::ConstSharedPtr & msg)
 {
-  // No procesar si no se ha recibido el camera_info
   if (!cam_info_received) return;
 
-  rclcpp::Time curr_stamp = msg->header.stamp;  // Timestamp actual de la imagen
+  rclcpp::Time curr_stamp = msg->header.stamp;
 
   try {
-    // Convertir imagen ROS a OpenCV
     auto cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
     inImage = cv_ptr->image;
 
-    markers.clear();  // Limpiar marcadores detectados previos
-
-    // Detectar marcadores en la imagen
+    markers.clear();
     mDetector.detect(inImage, markers, camParam, default_marker_size, false);
 
-    // Procesar cada marcador detectado
-    for (auto& marker : markers) {  
+    for (auto& marker : markers) {  // <- Cambiado a mutable (no const)
       double size = default_marker_size;
-
-      // Si se proporcionó lista de tamaños por ID, usarla
       if (!marker_sizes_by_id.empty()) {
         auto it = marker_sizes_by_id.find(marker.id);
         if (it == marker_sizes_by_id.end()) continue;  // Ignorar marcadores no deseados
         size = it->second;
       }
 
-      // Calcular la pose del marcador respecto a la cámara
       marker.calculateExtrinsics(size, camParam, false);
 
-      // Convertir rotación de vector de rotación a matriz
       cv::Mat rot(3, 3, CV_64FC1);
       cv::Mat Rvec64;
       marker.Rvec.convertTo(Rvec64, CV_64FC1);
       cv::Rodrigues(Rvec64, rot);
-
-      // Convertir traslación
       cv::Mat tran64;
       marker.Tvec.convertTo(tran64, CV_64FC1);
 
-      // Construir rotación y traslación como objetos tf2
       tf2::Matrix3x3 tf_rot(
         rot.at<double>(0, 0), rot.at<double>(0, 1), rot.at<double>(0, 2),
         rot.at<double>(1, 0), rot.at<double>(1, 1), rot.at<double>(1, 2),
@@ -100,9 +79,8 @@ void image_callback(const sensor_msgs::msg::Image::ConstSharedPtr & msg)
         tran64.at<double>(2, 0)
       );
 
-      tf2::Transform transform(tf_rot, tf_orig);  // Pose completa del marcador
+      tf2::Transform transform(tf_rot, tf_orig);
 
-      // Crear y rellenar mensaje de transformación
       geometry_msgs::msg::TransformStamped t;
       t.header.stamp = curr_stamp;
       t.header.frame_id = parent_name;
@@ -115,13 +93,10 @@ void image_callback(const sensor_msgs::msg::Image::ConstSharedPtr & msg)
       t.transform.rotation.z = transform.getRotation().z();
       t.transform.rotation.w = transform.getRotation().w();
 
-      br->sendTransform(t);  // Publicar la transformación TF
-
-      // Dibujar ejes 3D del marcador en la imagen
+      br->sendTransform(t);
       aruco::CvDrawingUtils::draw3dAxis(inImage, marker, camParam);
     }
 
-    // Publicar imagen resultante si hay suscriptores
     if (image_pub.getNumSubscribers() > 0) {
       cv_bridge::CvImage out_msg;
       out_msg.header.stamp = curr_stamp;
@@ -135,22 +110,19 @@ void image_callback(const sensor_msgs::msg::Image::ConstSharedPtr & msg)
   }
 }
 
-// Callback para recibir la información de la cámara
 void cam_info_callback(const sensor_msgs::msg::CameraInfo &cam_info)
 {
-  if (cam_info_received) return;  // Solo recibir una vez
+  if (cam_info_received) return;
 
   cv::Mat cameraMatrix(3, 4, CV_64FC1, 0.0);
   cv::Mat distorsionCoeff(4, 1, CV_64FC1);
   cv::Size size(cam_info.width, cam_info.height);
 
   if (useRectifiedImages) {
-
     for (int i = 0; i < 12; ++i)
       cameraMatrix.at<double>(i / 4, i % 4) = cam_info.p[i];
-    distorsionCoeff.setTo(0);  
+    distorsionCoeff.setTo(0);
   } else {
-
     for (int i = 0; i < 9; ++i)
       cameraMatrix.at<double>(i / 3, i % 3) = cam_info.k[i];
 
@@ -158,27 +130,26 @@ void cam_info_callback(const sensor_msgs::msg::CameraInfo &cam_info)
       for (int i = 0; i < 4; ++i)
         distorsionCoeff.at<double>(i, 0) = cam_info.d[i];
     else
-      distorsionCoeff.setTo(0);  
+      distorsionCoeff.setTo(0);
   }
 
-  // Establecer parámetros de cámara para la detección de arucos
   camParam = aruco::CameraParameters(cameraMatrix, distorsionCoeff, size);
   cam_info_received = true;
 }
 
 int main(int argc, char * argv[])
 {
-  rclcpp::init(argc, argv);  // Inicializar ROS2
-  node = rclcpp::Node::make_shared("image_publisher");  // Crear nodo
+  rclcpp::init(argc, argv);
+  node = rclcpp::Node::make_shared("image_publisher");
   image_transport::ImageTransport it(node);
 
-  // Declarar y leer parámetros desde el launcher
+  // Parámetros generales
   node->declare_parameter("parent_name", "camera");
   node->declare_parameter("child_name", "marker_");
-  node->declare_parameter("dictionary_type", "ALL_DICTS");
+  node->declare_parameter("dictionary_type", "DICT_4X4_100");
   node->declare_parameter("image_is_rectified", true);
   node->declare_parameter("marker_size", 0.1);
-  node->declare_parameter("recognized_ids", std::vector<long>());  
+  node->declare_parameter("recognized_ids", std::vector<long>());  // Cambiado a long
   node->declare_parameter("recognized_sizes", std::vector<double>());
 
   node->get_parameter("parent_name", parent_name);
@@ -192,14 +163,12 @@ int main(int argc, char * argv[])
   node->get_parameter("recognized_ids", recognized_ids_long);
   node->get_parameter("recognized_sizes", recognized_sizes);
 
-  
   std::vector<int> recognized_ids;
   recognized_ids.reserve(recognized_ids_long.size());
   for (auto id : recognized_ids_long) {
     recognized_ids.push_back(static_cast<int>(id));
   }
 
-  // Si hay IDs reconocidos, asignar cada tamaño a un ID
   if (!recognized_ids.empty()) {
     if (recognized_ids.size() != recognized_sizes.size()) {
       RCLCPP_ERROR(node->get_logger(), "recognized_ids y recognized_sizes deben tener el mismo tamaño");
@@ -213,20 +182,15 @@ int main(int argc, char * argv[])
     RCLCPP_INFO(node->get_logger(), "Modo completo: detectando todos los IDs con tamaño %.2fm.", default_marker_size);
   }
 
-  // Seleccionar el diccionario para la detección 
   mDetector.setDictionary(dictionary_type);
 
-  // Crear broadcaster para las tf
+  // Inicializa TransformBroadcaster solo una vez
   br = std::make_unique<tf2_ros::TransformBroadcaster>(node);
 
-  // Suscribirse a imagen y cámara
   image_transport::Subscriber image_sub = it.subscribe("/image_rect", 1, image_callback);
   cam_info_sub = node->create_subscription<sensor_msgs::msg::CameraInfo>("/camera_info", 1, cam_info_callback);
-
-  // Publicador de imagen con ejes dibujados
   image_pub = it.advertise("result", 10);
 
-  // Ejecutar el nodo
   rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;

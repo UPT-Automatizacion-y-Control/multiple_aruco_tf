@@ -1,0 +1,106 @@
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    return LaunchDescription([
+        Node(
+            package='cv_camera',
+            executable='cv_camera_node',
+            name='laptop_cv_camera',
+            parameters=[
+                {"device_path": "/dev/video2"},
+                {"device_id": 2},
+                {"frame_id": "camera_laptop"},
+                {"image_width": 1920},
+                {"image_height": 1080},
+                {"rate": 30.0},
+                {"pixel_format": "MJPG"},
+                {"camera_info_url": "file:///home/ypur_user/calibrationdata/your_file.yaml"}
+			]
+        ),
+        Node(
+            package='image_proc',
+            executable='rectify_node',
+            name='laptop_rectify_node',
+            parameters=[
+                {'image_transport': 'compressed'}
+            ]
+        ),
+        Node(
+            package='multiple_aruco_ros2',
+            executable='multiple_aruco_tf_ros2',
+            name ='nodo_aruco_pared',
+            parameters=[
+                {"parent_name": "camera_laptop"},
+                {"dictionary_type": "/home/your_profile/aruco7x7.dict"},
+                {"recognized_ids": [1]},  # ID's específicos que se quieren reconocer
+                {"recognized_sizes": [0.10]}  # Tamaños para cada ID
+            ],
+            remappings=[
+                ('result', 'aruco_7x7/result'),
+                ('result/compressed', 'aruco_7x7/result/compressed'),
+                ('image_rect', '/laptop/image_rect'),
+                ('camera_info', '/laptop/camera_info'),
+            ]
+        ),
+        Node(
+            package='multiple_aruco_ros2',
+            executable='multiple_aruco_tf_ros2',
+            name ='nodo_aruco_lancha',
+            parameters=[
+                {"parent_name": "camera_laptop"},
+                {"dictionary_type": "/home/your_profile/aruco5x5.dict"},
+                {"recognized_ids": [0]},  # ID's específicos que se quieren reconocer
+                {"recognized_sizes": [0.2]}  # Tamaños para cada ID
+            ],
+            remappings=[
+                ('result', 'aruco_5x5/result'),
+                ('result/compressed', 'aruco_5x5/result/compressed'),
+                ('image_rect', '/laptop/image_rect'),
+                ('camera_info', '/laptop/camera_info'),
+            ]
+        ),
+        Node(
+             package='tf2_ros',
+             executable='static_transform_publisher',
+             name='tf_marco_inercial',
+             arguments = ['--x', '0', '--y', '-0.40', '--z', '0', '--yaw', '0', '--pitch', '0', '--roll', '0', '--frame-id', 'marker_0', '--child-frame-id', 'marco_inercial']
+        ),
+        Node(
+             package='tf2_ros',
+             executable='static_transform_publisher',
+             name='tf_centro_masa_1',
+             arguments = ['--x', '0', '--y', '-0.40', '--z', '-0.50', '--yaw', '0', '--pitch', '0', '--roll', '0', '--frame-id', 'marker_1', '--child-frame-id', 'mc_1']
+        ),
+        Node(
+            package='multiple_aruco_ros2',
+            executable='relative_pose',
+            name='nodo_relative_pose_1',
+            parameters=[
+                {"parent_frame": "marker_0"},
+                {"child_frame": "marker_1"}
+			]
+        ),
+        Node(
+            package='multiple_aruco_ros2',
+            executable='relative_pose',
+            name='nodo_relative_pose_2',
+            parameters=[
+                {"parent_frame": "marco_inercial"},
+                {"child_frame": "marker_1"}
+			]
+        ),
+        Node(
+            package='multiple_aruco_ros2',
+            executable='relative_pose',
+            name='nodo_relative_pose_3',
+            parameters=[
+                {"parent_frame": "marco_inercial"},
+                {"child_frame": "mc_1"}
+			]
+        ),
+        Node(
+             package='rqt_image_view',
+             executable='rqt_image_view'
+        )
+    ])

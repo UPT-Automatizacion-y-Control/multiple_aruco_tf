@@ -23,6 +23,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     sensor_msgs
     visualization_msgs
     turtlesim
+    usb_cam
+    yaml-cpp 
 )
 find_package(ament_cmake REQUIRED)
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
@@ -65,7 +67,17 @@ target_include_directories(obtener_imagen
 ament_target_dependencies(obtener_imagen ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(obtener_imagen ${OpenCV_LIBRARIES})
 
+add_executable(tf_relativo src/tf_relativo.cpp)
+target_include_directories(tf_relativo
+  PUBLIC
+  include)
 
+target_include_directories(tf_relativo
+  SYSTEM PUBLIC
+  ${OpenCV_INCLUDE_DIRS}
+)
+ament_target_dependencies(tf_relativo ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(tf_relativo ${OpenCV_LIBRARIES})
 
 add_executable(camera_hd src/camera_hd.cpp)
 target_include_directories(camera_hd
@@ -79,6 +91,92 @@ target_include_directories(camera_hd
 ament_target_dependencies(camera_hd ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(camera_hd ${OpenCV_LIBRARIES})
 
+
+
+
+
+
+
+
+
+add_executable(calibrar_camara src/calibrar_camara.cpp)
+target_include_directories(calibrar_camara
+  PUBLIC
+  include)
+
+target_include_directories(calibrar_camara
+  SYSTEM PUBLIC
+  ${OpenCV_INCLUDE_DIRS}
+)
+ament_target_dependencies(calibrar_camara ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(calibrar_camara ${OpenCV_LIBRARIES})
+
+##################################################################################333
+add_executable(video_capture_best_effort src/video_capture_best_effort.cpp)
+target_include_directories(video_capture_best_effort
+  PUBLIC
+  include)
+
+target_include_directories(video_capture_best_effort
+  SYSTEM PUBLIC
+  ${OpenCV_INCLUDE_DIRS}
+)
+ament_target_dependencies(video_capture_best_effort ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(video_capture_best_effort ${OpenCV_LIBRARIES})
+
+##################################################################################333
+add_executable(hsv_segmentacion src/hsv_segmentacion.cpp)
+target_include_directories(hsv_segmentacion
+  PUBLIC
+  include)
+
+target_include_directories(hsv_segmentacion
+  SYSTEM PUBLIC
+  ${OpenCV_INCLUDE_DIRS}
+)
+ament_target_dependencies(hsv_segmentacion ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(hsv_segmentacion ${OpenCV_LIBRARIES})
+
+##################################################################################333
+add_executable(almacenar_tf src/almacenar_tf.cpp)
+target_include_directories(almacenar_tf
+  PUBLIC
+  include)
+
+target_include_directories(almacenar_tf
+  SYSTEM PUBLIC
+  ${OpenCV_INCLUDE_DIRS}
+)
+ament_target_dependencies(almacenar_tf ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(almacenar_tf ${OpenCV_LIBRARIES})
+
+##################################################################################333
+
+##################################################################################333
+add_executable(almacenar_tf_txt src/almacenar_tf_txt.cpp)
+target_include_directories(almacenar_tf_txt
+  PUBLIC
+  include)
+
+target_include_directories(almacenar_tf_txt
+  SYSTEM PUBLIC
+  ${OpenCV_INCLUDE_DIRS}
+)
+ament_target_dependencies(almacenar_tf_txt ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(almacenar_tf_txt ${OpenCV_LIBRARIES})
+
+##################################################################################333
+add_executable(publish_tf src/publish_tf.cpp)
+target_include_directories(publish_tf
+  PUBLIC
+  include)
+
+target_include_directories(publish_tf
+  SYSTEM PUBLIC
+  ${OpenCV_INCLUDE_DIRS}
+)
+ament_target_dependencies(publish_tf ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(publish_tf ${OpenCV_LIBRARIES})
 #add_executable(listener_tf src/listener_tf.cpp)
 #target_include_directories(listener_tf
 #  PUBLIC
@@ -114,8 +212,15 @@ endif()
 install(TARGETS
   multiple_aruco_tf_ros2
   relative_pose
+  tf_relativo
   obtener_imagen
   camera_hd
+  calibrar_camara
+  video_capture_best_effort
+  hsv_segmentacion
+  almacenar_tf
+  almacenar_tf_txt
+  publish_tf
 #  listener_tf
   DESTINATION lib/${PROJECT_NAME})
 
