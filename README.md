@@ -79,7 +79,7 @@ Supported Dictionaries
 
 Download printable markes in: https://chev.me/arucogen/
 
-You can also generate and use Dictionaries using as example the "generar_arucos_7_7_completo.py" node in the /src file. An example of this is in the "relative_pose_example.launch".
+You can also generate and use Dictionaries using as example the "generar_arucos_7_7_completo.py" node in the /src file which genererate the 7x7 Dictionary . An example of this is in the "relative_pose_example.launch".
 
 # Relative Pose
 Each launch file includes an optional feature to publish the relative pose between two TF frames via a topic.
